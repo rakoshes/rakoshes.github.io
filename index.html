@@ -1,0 +1,211 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>Kodenames Pix</title>
+  <meta name="description" content="The HTML5 Herald">
+  <meta name="author" content="SitePoint">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+  <style>
+    img {
+      display: block;
+      border: solid;
+      border-width: 1px;
+      border-color: black;
+    }
+    .spymaster {
+      display: block;
+      border: solid;
+      border-width: 5px;
+      border-color: white;
+    }
+    body{
+      margin: 0px;
+      background: grey;
+    }
+    #theTable{
+      border: solid;
+      border-color: red;
+    }
+    .tint {
+      position: relative;
+      float: left;
+      cursor: pointer;
+      -webkit-shadow: rgba(0,0,0,.2) 3px 5px 5px;
+      -moz-shadow: rgba(0,0,0,.2) 3px 5px 5px;
+      box-shadow: rgba(0,0,0,.2) 3px 5px 5px;
+    }
+    
+    .tint:before {
+      content: "";
+      display: block;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      -moz-transition: all .3s linear;
+      -webkit-transition: all .3s linear;
+      -ms-transition: all .3s linear;
+      -o-transition: all .3s linear;
+      transition: all .3s linear;
+    }
+    .tint:before {
+      background: rgba(0,255,255, 0.5);
+    }
+    .red:before{
+      background: rgba(255,0,0, 0.5);
+    }
+    .blue:before {
+      background: rgba(0,0,255, 0.5);
+    }
+    .yellow:before {
+       background: rgba(255,255,0, 0.5);
+     }
+     .green:before {
+       background: rgba(0,255,0, 0.5);
+     }
+     .t5:before {
+       background: rgba(0,0,0, 0.5);;
+     }
+    figure {
+      margin: 0 0 0 0;
+    }
+  </style>
+</head>
+
+<body>
+  <table id='theTable' style="width:100%">
+  </table>
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-48676831-8', 'auto');
+    ga('send', 'pageview');
+
+  </script>
+  <script src="seedrandom.js"></script>
+  <script>
+    var spymaster = false;
+    if(window.location.hash) {
+      var hash = window.location.hash.substring(1).toLowerCase();
+      if(hash.charAt(0) === '?'){
+        hash = hash.substring(1);
+        spymaster = true;
+      } else {
+        //do something
+      }
+      Math.seedrandom(hash);
+    }
+      (function(){
+        var arr = [];
+      while(arr.length < 25){
+             var randomnumber= Math.floor((Math.random() * 278));
+             var found=false;
+             for(var i=0;i<arr.length;i++){
+            if(arr[i]===randomnumber){found=true;break;}
+             }
+             if(!found) arr.push(randomnumber);
+      }
+
+      var imgWidth = $(window).width() / 5.5;
+      var imgHeight = imgWidth * 5 / 8;
+
+      if(imgHeight * 5 > $(window).height()){
+        imgHeight = $(window).height() / 5.5;
+        imgWidth = imgHeight * 8 / 5;        
+      }
+      var arrCounter = 0;
+      for(var i = 0;i < 5; i++){
+        
+        $('#theTable').append('<tr id="row' + i + '""></tr>');
+        for (var j = 0;j < 5; j++){
+          $('#row' + i).append('<td><img src="assets/pix' + arr[arrCounter++] + '.png" style="width: ' + imgWidth + 'px; height: ' + imgHeight +'px;"></td>');
+        }
+      }
+      var teams = [];
+      //9 8 1 7     
+      for(var i = 0;i<7;i++){
+        teams.push('redSecret');
+        teams.push('blueSecret');
+        teams.push('yellowSecret');
+      }
+      teams.push('redSecret');
+      teams.push('blueSecret');
+      teams.push('blackSecret');
+      //random starter team
+      if(Math.floor((Math.random() * 2) + 1) % 2 === 0){
+          teams.push('redSecret');
+          //make border red
+      } else {
+        teams.push('blueSecret');
+        $('#theTable').css('border-color', 'blue');
+      }
+
+
+      shuffle(teams);
+      $( "img" ).each(function() {
+        $(this).addClass(teams.pop());
+      });
+
+
+      if(spymaster){
+        $('img').addClass('spymaster');
+        $('img').each(function(){
+          if($(this).hasClass('redSecret')){
+            $(this).css('border-color', 'red');
+          } else if($(this).hasClass('blueSecret')){
+            $(this).css('border-color', 'blue');
+          } else if($(this).hasClass('yellowSecret')){
+            $(this).css('border-color', 'yellow');
+          } else if($(this).hasClass('blackSecret')){
+            $(this).css('border-color', 'black');
+          }  
+        });
+
+        $('img').bind('click', function(){
+          $(this).wrap('<figure class="tint green"></figure>');
+        });
+      } else {
+        $('img').bind('click', function(){
+          if($(this).hasClass('redSecret')){
+            $(this).wrap('<figure class="tint red"></figure>');
+          } else if($(this).hasClass('blueSecret')){
+            $(this).wrap('<figure class="tint blue"></figure>');
+          } else if($(this).hasClass('yellowSecret')){
+            $(this).wrap('<figure class="tint yellow"></figure>');
+          } else if($(this).hasClass('blackSecret')){
+            $(this).wrap('<figure class="tint t5"></figure>');
+          }  
+        }); 
+      }
+    })();
+
+    function shuffle(array) {
+      var currentIndex = array.length, temporaryValue, randomIndex;
+
+      // While there remain elements to shuffle...
+      while (0 !== currentIndex) {
+
+        // Pick a remaining element...
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex -= 1;
+
+        // And swap it with the current element.
+        temporaryValue = array[currentIndex];
+        array[currentIndex] = array[randomIndex];
+        array[randomIndex] = temporaryValue;
+      }
+
+      return array;
+    }
+
+  </script>
+
+</body>
+</html>
