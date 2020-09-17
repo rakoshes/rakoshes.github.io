@@ -112,11 +112,12 @@
 
     function onInputChange(value) {
       code = value;
+      spymaster = spymaster && code.length;
       renderField();
     }
     
     function onSpyMasterClick() {
-      spymaster = !spymaster;
+      spymaster = !spymaster && code.length;
       renderField();
     }
 
