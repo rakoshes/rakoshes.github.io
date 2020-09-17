@@ -78,30 +78,17 @@
       color: #000;
       padding: 16px;
     }
-  </style>
-</head>
-
-<body>
-  <div class="actionBar" >
-    <button id="spyMasterId" onclick="alert('Hello')">Spy Master</button>
-  </div>
-  <table id='theTable' style="width:100%">
-  </table>
-  <script src="seedrandom.js"></script>
-  <script>
-    var spymaster = false;
-    if(window.location.hash) {
-      var hash = window.location.hash.substring(1).toLowerCase();
-      if(hash.charAt(0) === '?'){
-        hash = hash.substring(1);
-        spymaster = true;
-      } else {
-        //do something
-      }
-      Math.seedrandom(hash);
+    button {
+      padding: 8px;
     }
-      (function(){
-        var arr = [];
+  </style>
+  <script>
+    function onSpyMasterClick() {
+      render(true);
+    }
+    function render(isSpymaster) {
+      $('#theTable').html("");
+      var arr = [];
       while(arr.length < 25){
              var randomnumber= Math.floor((Math.random() * 278));
              var found=false;
@@ -152,7 +139,7 @@
       });
 
 
-      if(spymaster){
+      if(isSpymaster){
         $('img').addClass('spymaster');
         $('img').each(function(){
           if($(this).hasClass('redSecret')){
@@ -182,7 +169,7 @@
           }  
         }); 
       }
-    })();
+    };
 
     function shuffle(array) {
       var currentIndex = array.length, temporaryValue, randomIndex;
@@ -202,6 +189,28 @@
 
       return array;
     }
+
+  </script>
+</head>
+
+<body>
+  <div class="actionBar" >
+    <button id="spyMasterId" onclick="onSpyMasterClick()">Spy Master</button>
+  </div>
+  <table id='theTable' style="width:100%">
+  </table>
+  <script src="seedrandom.js"></script>
+  <script>
+    var spymaster = false;
+    if(window.location.hash) {
+      var hash = window.location.hash.substring(1).toLowerCase();
+      if(hash.charAt(0) === '?'){
+        hash = hash.substring(1);
+        spymaster = true;
+      }
+      Math.seedrandom(hash);
+    }
+    render(spymaster);
 
   </script>
 
