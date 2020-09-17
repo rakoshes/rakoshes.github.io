@@ -77,17 +77,57 @@
       background-color: #fff;
       color: #000;
       padding: 16px;
+      text-align: right;
     }
     button {
       padding: 8px;
     }
-  </style>
-  <script>
-    function onSpyMasterClick() {
-      render(true);
+    input {
+      margin-right: 16px;
     }
+    .gamePrompt {
+      font-weight: bold;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 14px;
+      margin-right: 8px;
+    }
+  </style>
+  <script src="seedrandom.js"></script>
+  <script>
+    var spymaster = false;
+    var hash = "";
+
+  </script>
+  
+  <script>
+    function renderField() {
+      if (hash.length) {;
+        Math.seedrandom(hash);
+      }
+      render(spymaster);
+    }
+    function onLoad() {
+      renderField();
+    }
+
+    function onInputChange(value) {
+      hash = value;
+      renderField();
+    }
+    
+    function onSpyMasterClick() {
+      spymaster = !spymaster;
+      renderField();
+    }
+
     function render(isSpymaster) {
       $('#theTable').html("");
+      if (!hash.length) {
+        $('#promptId').html("Welcome to KodeNames! Please enter a code:");
+        return;
+      } else {
+        $('#promptId').html("");
+      }
       var arr = [];
       while(arr.length < 25){
              var randomnumber= Math.floor((Math.random() * 278));
@@ -189,30 +229,16 @@
 
       return array;
     }
-
   </script>
 </head>
 
-<body>
-  <div class="actionBar" >
+<body onload="onLoad()">
+  <div class="actionBar">
+    <span id="promptId" class="gamePrompt"></span>
+    <input type="text" placeholder="Enter code" maxlength="6" onkeyup="onInputChange(this.value)" />
     <button id="spyMasterId" onclick="onSpyMasterClick()">Spy Master</button>
   </div>
   <table id='theTable' style="width:100%">
   </table>
-  <script src="seedrandom.js"></script>
-  <script>
-    var spymaster = false;
-    if(window.location.hash) {
-      var hash = window.location.hash.substring(1).toLowerCase();
-      if(hash.charAt(0) === '?'){
-        hash = hash.substring(1);
-        spymaster = true;
-      }
-      Math.seedrandom(hash);
-    }
-    render(spymaster);
-
-  </script>
-
 </body>
 </html>
