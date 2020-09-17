@@ -76,16 +76,29 @@
     .actionBar {
       background-color: #fff;
       color: #000;
+      /* text-align: right; */
+    }
+    .actionBarContainer {
+      float: right;
       padding: 8px;
-      text-align: right;
+    }
+    .logoContainer {
+      float: left;
+      padding: 0 0 0 16px;
+    }
+    .logoImg {
+      width: 50px;
+      border: none;
     }
     button {
       padding: 8px;
     }
     input {
       margin-right: 16px;
+      padding: 6px;
+      font-size: 16px;
     }
-    .gamePrompt {
+    .title {
       font-weight: bold;
       font-family: Arial, Helvetica, sans-serif;
       font-size: 14px;
@@ -151,7 +164,7 @@
         
         $('#theTable').append('<tr id="row' + i + '""></tr>');
         for (var j = 0;j < 5; j++){
-          $('#row' + i).append('<td><img src="assets/pix' + arr[arrCounter++] + '.png" style="width: ' + imgWidth + 'px; height: ' + imgHeight +'px;"></td>');
+          $('#row' + i).append('<td><img class="tile" src="assets/pix' + arr[arrCounter++] + '.png" style="width: ' + imgWidth + 'px; height: ' + imgHeight +'px;"></td>');
         }
       }
       var teams = [];
@@ -175,14 +188,14 @@
 
 
       shuffle(teams);
-      $( "img" ).each(function() {
+      $( "img.tile" ).each(function() {
         $(this).addClass(teams.pop());
       });
 
 
       if(isSpymaster){
-        $('img').addClass('spymaster');
-        $('img').each(function(){
+        $('img.tile').addClass('spymaster');
+        $('img.tile').each(function(){
           if($(this).hasClass('redSecret')){
             $(this).css('border-color', 'red');
           } else if($(this).hasClass('blueSecret')){
@@ -194,11 +207,11 @@
           }  
         });
 
-        $('img').bind('click', function(){
+        $('img.tile').bind('click', function(){
           $(this).wrap('<figure class="tint green"></figure>');
         });
       } else {
-        $('img').bind('click', function(){
+        $('img.tile').bind('click', function(){
           if($(this).hasClass('redSecret')){
             $(this).wrap('<figure class="tint red"></figure>');
           } else if($(this).hasClass('blueSecret')){
@@ -235,9 +248,15 @@
 
 <body onload="onLoad()">
   <div class="actionBar">
-    <span id="promptId" class="gamePrompt"></span>
-    <input type="text" placeholder="Enter code" maxlength="6" onkeyup="onInputChange(this.value)" />
-    <button id="spyMasterId" onclick="onSpyMasterClick()">Spy Master</button>
+    <div class="actionBarContainer">
+      <span id="promptId" class="title"></span>
+      <input type="text" placeholder="Enter code" maxlength="6" onkeyup="onInputChange(this.value)" />
+      <button id="spyMasterId" onclick="onSpyMasterClick()">Spy Master</button>
+    </div>
+    <div class="logoContainer">
+      <img class="logoImg" src="img/blackhat.png" />
+    </div>
+    <div style="clear: both;"></div>
   </div>
   <table id='theTable' style="width:100%">
   </table>
