@@ -95,14 +95,14 @@
   <script src="seedrandom.js"></script>
   <script>
     var spymaster = false;
-    var hash = "";
+    var code = "";
 
   </script>
   
   <script>
     function renderField() {
-      if (hash.length) {;
-        Math.seedrandom(hash);
+      if (code.length) {;
+        Math.seedrandom(code);
       }
       render(spymaster);
     }
@@ -111,7 +111,7 @@
     }
 
     function onInputChange(value) {
-      hash = value;
+      code = value;
       renderField();
     }
     
@@ -122,7 +122,7 @@
 
     function render(isSpymaster) {
       $('#theTable').html("");
-      if (!hash.length) {
+      if (!code.length) {
         $('#promptId').html("Welcome to KodeNames! Please enter a code:");
         return;
       } else {
