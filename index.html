@@ -87,8 +87,10 @@
       padding: 0 0 0 16px;
     }
     .logoImg {
-      width: 50px;
+      height: 50px;
       border: none;
+      float: left;
+      cursor: pointer;
     }
     button {
       padding: 8px;
@@ -102,13 +104,15 @@
       font-weight: bold;
       font-family: Arial, Helvetica, sans-serif;
       font-size: 20px;
-      margin-right: 8px;
+      margin: 14px 0 0 16px;
+      float: left;
     }
   </style>
   <script src="seedrandom.js"></script>
   <script>
     var spymaster = false;
     var code = "";
+    var defaultLogo = true;
 
   </script>
   
@@ -121,6 +125,7 @@
     }
     function onLoad() {
       renderField();
+      $('#codeId').focus();
     }
 
     function onInputChange(value) {
@@ -133,15 +138,15 @@
       spymaster = !spymaster && code.length;
       renderField();
     }
-
+    function onLogoClick(img) {
+      defaultLogo = !defaultLogo;
+      img.src = defaultLogo ? "img/blackhat.png" : "img/fedora.png";    
+    }
     function render(isSpymaster) {
       $('#theTable').html("");
       if (!code.length) {
-        $('#promptId').html("Welcome to KodeNames!");
         return;
-      } else {
-        $('#promptId').html("");
-      }
+      };
       var arr = [];
       while(arr.length < 25){
              var randomnumber= Math.floor((Math.random() * 278));
@@ -249,12 +254,12 @@
 <body onload="onLoad()">
   <div class="actionBar">
     <div class="actionBarContainer">
-      <span id="promptId" class="title"></span>
-      <input type="text" placeholder="Enter code" maxlength="6" onkeyup="onInputChange(this.value)" />
+      <input id="codeId" type="text" placeholder="Enter code" maxlength="6" onkeyup="onInputChange(this.value)" />
       <button id="spyMasterId" onclick="onSpyMasterClick()">Spy Master</button>
     </div>
     <div class="logoContainer">
-      <img class="logoImg" src="img/blackhat.png" />
+      <img class="logoImg"  onclick="onLogoClick(this)" src="img/blackhat.png" />
+      <span id="promptId" class="title">Welcome to KodeNames!</span>
     </div>
     <div style="clear: both;"></div>
   </div>
