@@ -117,26 +117,26 @@
   </script>
   
   <script>
-    function renderField() {
+    function renderBoard() {
       if (code.length) {;
         Math.seedrandom(code);
       }
       render(spymaster);
     }
     function onLoad() {
-      renderField();
+      renderBoard();
       $('#codeId').focus();
     }
 
     function onInputChange(value) {
       code = value;
       spymaster = spymaster && code.length;
-      renderField();
+      renderBoard();
     }
     
     function onSpyMasterClick() {
       spymaster = !spymaster && code.length;
-      renderField();
+      renderBoard();
     }
     function onLogoClick(img) {
       defaultLogo = !defaultLogo;
@@ -159,9 +159,9 @@
 
       var imgWidth = $(window).width() / 5.5;
       var imgHeight = imgWidth * 5 / 8;
-
-      if(imgHeight * 5 > $(window).height()){
-        imgHeight = $(window).height() / 5.5;
+      var boardHeight = $(window).height() - 51; // Less header height
+      if(imgHeight * 5 > boardHeight){
+        imgHeight = boardHeight / 5.5;
         imgWidth = imgHeight * 8 / 5;        
       }
       var arrCounter = 0;
@@ -251,7 +251,7 @@
   </script>
 </head>
 
-<body onload="onLoad()">
+<body onload="onLoad()" onresize="renderBoard()">
   <div class="actionBar">
     <div class="actionBarContainer">
       <input id="codeId" type="text" placeholder="Enter code" maxlength="6" onkeyup="onInputChange(this.value)" />
