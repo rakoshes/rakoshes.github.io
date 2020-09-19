@@ -112,12 +112,25 @@
   <script>
     var spymaster = false;
     var code = "";
-    var defaultLogo = true;
+    var selectionMap = {};
+    var logoIndex = 0;
+    var logoList = [
+    "img/blackhat.png",
+    "img/fedora.png",
+    "img/bowler.png",
+    "img/spy1.png",
+    "img/spy2.png",
+    "img/spy3.png",
+    "img/spy4.png",
+    ];
 
   </script>
   
   <script>
-    function renderBoard() {
+    function renderBoard(reset) {
+      if (reset) {
+        selectionMap = {};
+      }
       if (code.length) {;
         Math.seedrandom(code);
       }
@@ -131,7 +144,7 @@
     function onInputChange(value) {
       code = value;
       spymaster = spymaster && code.length;
-      renderBoard();
+      renderBoard(true);
     }
     
     function onSpyMasterClick() {
@@ -139,8 +152,7 @@
       renderBoard();
     }
     function onLogoClick(img) {
-      defaultLogo = !defaultLogo;
-      img.src = defaultLogo ? "img/blackhat.png" : "img/fedora.png";    
+      img.src = logoList[++logoIndex % logoList.length];
     }
     function render(isSpymaster) {
       $('#theTable').html("");
@@ -169,7 +181,7 @@
         
         $('#theTable').append('<tr id="row' + i + '""></tr>');
         for (var j = 0;j < 5; j++){
-          $('#row' + i).append('<td><img class="tile" src="assets/pix' + arr[arrCounter++] + '.png" style="width: ' + imgWidth + 'px; height: ' + imgHeight +'px;"></td>');
+          $('#row' + i).append('<td><img id="tile' + arrCounter + '" class="tile" src="assets/pix' + arr[arrCounter++] + '.png" style="width: ' + imgWidth + 'px; height: ' + imgHeight +'px;"></td>');
         }
       }
       var teams = [];
@@ -210,13 +222,18 @@
           } else if($(this).hasClass('blackSecret')){
             $(this).css('border-color', 'black');
           }  
+          if (selectionMap[this.id]) {
+            $(this).wrap('<figure class="tint green"></figure>');
+          }
         });
 
         $('img.tile').bind('click', function(){
+          setSelectionMap(this);
           $(this).wrap('<figure class="tint green"></figure>');
         });
       } else {
         $('img.tile').bind('click', function(){
+          setSelectionMap(this);
           if($(this).hasClass('redSecret')){
             $(this).wrap('<figure class="tint red"></figure>');
           } else if($(this).hasClass('blueSecret')){
@@ -227,8 +244,25 @@
             $(this).wrap('<figure class="tint t5"></figure>');
           }  
         }); 
+        $('img.tile').each(function(){
+          if(selectionMap[this.id]){
+            $(this).wrap('<figure class="tint ' + selectionMap[this.id] + '"></figure>');
+          }
+        }); 
       }
     };
+  
+    function setSelectionMap(tile) {
+      if($(tile).hasClass('redSecret')){
+        selectionMap[tile.id] = "red";
+      } else if($(tile).hasClass('blueSecret')){
+        selectionMap[tile.id] = "blue";
+      } else if($(tile).hasClass('yellowSecret')){
+        selectionMap[tile.id] = "yellow";
+      } else if($(tile).hasClass('blackSecret')){
+        selectionMap[tile.id] = "t5";
+      }  
+    }
 
     function shuffle(array) {
       var currentIndex = array.length, temporaryValue, randomIndex;
