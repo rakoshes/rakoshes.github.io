@@ -96,7 +96,7 @@
       padding: 8px;
     }
     input {
-      margin-right: 16px;
+      margin: 0 16px;
       padding: 6px;
       font-size: 16px;
     }
@@ -113,17 +113,20 @@
     var spymaster = false;
     var code = "";
     var selectionMap = {};
-    var logoIndex = 0;
+    var logoIndex = parseInt(localStorage.getItem('logoIndex')) || 0;
     var logoList = [
     "img/blackhat.png",
     "img/fedora.png",
     "img/bowler.png",
     "img/spy1.png",
+    "img/mata1.png",
     "img/spy2.png",
+    "img/mata2.png",
     "img/spy3.png",
+    "img/mata3.png",
     "img/spy4.png",
+    "img/mata4.png",
     ];
-
   </script>
   
   <script>
@@ -137,8 +140,18 @@
       render(spymaster);
     }
     function onLoad() {
-      renderBoard();
+      var img = document.getElementById('logoImg');
+      img.src = logoList[logoIndex % logoList.length];
+      renderBoard(true);
       $('#codeId').focus();
+    }
+    function onReset() {
+      spymaster = false;
+      // code = "";
+      document.getElementById('codeId').value = code = "";
+      selectionMap = {};
+      renderBoard(true);
+
     }
 
     function onInputChange(value) {
@@ -153,6 +166,7 @@
     }
     function onLogoClick(img) {
       img.src = logoList[++logoIndex % logoList.length];
+      localStorage.setItem('logoIndex', logoIndex);
     }
     function render(isSpymaster) {
       $('#theTable').html("");
@@ -288,11 +302,12 @@
 <body onload="onLoad()" onresize="renderBoard()">
   <div class="actionBar">
     <div class="actionBarContainer">
+      <button id="resetId" onclick="onReset()">Reset</button>
       <input id="codeId" type="text" placeholder="Enter code" maxlength="6" onkeyup="onInputChange(this.value)" />
       <button id="spyMasterId" onclick="onSpyMasterClick()">Spy Master</button>
     </div>
     <div class="logoContainer">
-      <img class="logoImg"  onclick="onLogoClick(this)" src="img/blackhat.png" />
+      <img id="logoImg" class="logoImg"  onclick="onLogoClick(this)" src="img/blank.png" />
       <span id="promptId" class="title">Welcome to KodeNames!</span>
     </div>
     <div style="clear: both;"></div>
