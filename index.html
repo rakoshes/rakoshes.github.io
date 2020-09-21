@@ -76,7 +76,7 @@
     .actionBar {
       background-color: #fff;
       color: #000;
-      /* text-align: right; */
+      min-width: 1040px;;
     }
     .actionBarContainer {
       float: right;
@@ -104,15 +104,31 @@
       font-weight: bold;
       font-family: Arial, Helvetica, sans-serif;
       font-size: 20px;
-      margin: 14px 0 0 16px;
+      margin: 14px 16px 0 16px;
       float: left;
     }
+    .message {
+      font-weight: normal;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 16px;
+      margin: 14px 16px 0 16px;
+      float: left;
+    }
+    .leftButton {
+      float: left;
+      margin-left: 16px;
+      margin-top: 8px;
+    }
+
   </style>
   <script src="seedrandom.js"></script>
   <script>
     var spymaster = false;
     var code = "";
     var selectionMap = {};
+    var sessionMap = {};
+    var codeHistoryMap = {};
+    var message = '';
     var logoIndex = parseInt(localStorage.getItem('logoIndex')) || 0;
     var logoList = [
     "img/blackhat.png",
@@ -130,14 +146,16 @@
   </script>
   
   <script>
-    function renderBoard(reset) {
+    function renderBoard(reset, ignoreSession) {
       if (reset) {
         selectionMap = {};
-      }
+     }
       if (code.length) {;
         Math.seedrandom(code);
       }
-      render(spymaster);
+      if (render(spymaster, ignoreSession)) { 
+        onReset('Out of cards. Reset.'); // reset was requiested
+      }
     }
     function onLoad() {
       var img = document.getElementById('logoImg');
@@ -145,42 +163,64 @@
       renderBoard(true);
       $('#codeId').focus();
     }
-    function onReset() {
+    
+    function onReset(msg) {
       spymaster = false;
-      // code = "";
+      code = '';
+      message = msg || '';
       document.getElementById('codeId').value = code = "";
       selectionMap = {};
+      sessionMap = {};
+      codeHistoryMap = {};
       renderBoard(true);
 
     }
 
     function onInputChange(value) {
       code = value;
-      spymaster = spymaster && code.length;
-      renderBoard(true);
     }
-    
+
+    function onApplyClick() {
+      spymaster = spymaster && code.length;
+      selectionMap = {};
+      message = '';
+      var ignoreSession = !!codeHistoryMap[code]; // we are reusing previous code, allow re-use of tiles
+      codeHistoryMap[code] = codeHistoryMap[code] || {};
+      renderBoard(true, ignoreSession);
+    }
+
+
     function onSpyMasterClick() {
       spymaster = !spymaster && code.length;
-      renderBoard();
+      renderBoard(false, true);
     }
     function onLogoClick(img) {
       img.src = logoList[++logoIndex % logoList.length];
       localStorage.setItem('logoIndex', logoIndex);
     }
-    function render(isSpymaster) {
-      $('#theTable').html("");
+    function render(isSpymaster, ignoreSession) {
+      $('#theTable').html('');
+      $('#messageId').html(message);
       if (!code.length) {
-        return;
+        return false; // no reset is required
       };
       var arr = [];
-      while(arr.length < 25){
-             var randomnumber= Math.floor((Math.random() * 278));
-             var found=false;
-             for(var i=0;i<arr.length;i++){
-            if(arr[i]===randomnumber){found=true;break;}
-             }
-             if(!found) arr.push(randomnumber);
+      while(arr.length < 25) {
+        var randomnumber= Math.floor((Math.random() * 278));
+        var found=false;
+        for(var i=0;i<arr.length;i++){
+          var ignorePreviousUse  = false;
+          if (ignoreSession) {
+            ignorePreviousUse =  codeHistoryMap[code] && sessionMap[randomnumber]; // ignore only if the number was used with the current code; 
+          }
+          if(arr[i]===randomnumber || (!ignorePreviousUse) && sessionMap[randomnumber]){found=true;break;}
+        }
+        if(!found) {
+          arr.push(randomnumber);
+          sessionMap[randomnumber] = true;
+          codeHistoryMap[code] = true;
+        }
+        if (Object.keys(sessionMap).length >= 278) return true; // used up all the tiles - session reset is required.
       }
 
       var imgWidth = $(window).width() / 5.5;
@@ -264,6 +304,7 @@
           }
         }); 
       }
+      return false; // successfully rendered the board, no reset required
     };
   
     function setSelectionMap(tile) {
@@ -299,16 +340,18 @@
   </script>
 </head>
 
-<body onload="onLoad()" onresize="renderBoard()">
+<body onload="onLoad()" onresize="renderBoard(false, true)">
   <div class="actionBar">
-    <div class="actionBarContainer">
-      <button id="resetId" onclick="onReset()">Reset</button>
-      <input id="codeId" type="text" placeholder="Enter code" maxlength="6" onkeyup="onInputChange(this.value)" />
-      <button id="spyMasterId" onclick="onSpyMasterClick()">Spy Master</button>
-    </div>
     <div class="logoContainer">
       <img id="logoImg" class="logoImg"  onclick="onLogoClick(this)" src="img/blank.png" />
       <span id="promptId" class="title">Welcome to KodeNames!</span>
+      <button id="spyMasterId" class="leftButton" onclick="onSpyMasterClick()">Spy Master</button>
+      <span id="messageId" class="message"></span>
+    </div>
+    <div class="actionBarContainer">
+      <button id="resetId" onclick="onReset()">Reset</button>
+      <input id="codeId" type="text" placeholder="Enter code" maxlength="6" onkeyup="onInputChange(this.value)" />
+      <button id="applyId" onclick="onApplyClick()">Apply</button>
     </div>
     <div style="clear: both;"></div>
   </div>
