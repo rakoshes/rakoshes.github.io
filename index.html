@@ -76,7 +76,7 @@
     .actionBar {
       background-color: #fff;
       color: #000;
-      min-width: 1040px;;
+      min-width: 1040px;
     }
     .actionBarContainer {
       float: right;
@@ -179,6 +179,11 @@
     function onInputChange(value) {
       code = value;
     }
+    function onKeyPress(event) {
+      if (event.keyCode == 13) {
+        onApplyClick();  
+      }
+    }
 
     function onApplyClick() {
       spymaster = spymaster && code.length;
@@ -213,14 +218,15 @@
           if (ignoreSession) {
             ignorePreviousUse =  codeHistoryMap[code] && sessionMap[randomnumber]; // ignore only if the number was used with the current code; 
           }
-          if(arr[i]===randomnumber || (!ignorePreviousUse) && sessionMap[randomnumber]){found=true;break;}
+          // if(arr[i]===randomnumber || (!ignorePreviousUse) && sessionMap[randomnumber]){found=true;break;} // ignoring session for now
+          if(arr[i]===randomnumber){found=true;break;}
         }
         if(!found) {
           arr.push(randomnumber);
           sessionMap[randomnumber] = true;
           codeHistoryMap[code] = true;
         }
-        if (Object.keys(sessionMap).length >= 278) return true; // used up all the tiles - session reset is required.
+        // if (Object.keys(sessionMap).length >= 278) return true; // used up all the tiles - session reset is required. // ignoring session for now
       }
 
       var imgWidth = $(window).width() / 5.5;
@@ -350,7 +356,7 @@
     </div>
     <div class="actionBarContainer">
       <button id="resetId" onclick="onReset()">Reset</button>
-      <input id="codeId" type="text" placeholder="Enter code" maxlength="6" onkeyup="onInputChange(this.value)" />
+      <input id="codeId" type="text" placeholder="Enter code" maxlength="10" onkeypress="return onKeyPress(event)" onkeyup="onInputChange(this.value)" />
       <button id="applyId" onclick="onApplyClick()">Apply</button>
     </div>
     <div style="clear: both;"></div>
