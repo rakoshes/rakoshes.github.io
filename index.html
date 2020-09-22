@@ -186,7 +186,7 @@
     }
 
     function onApplyClick() {
-      spymaster = spymaster && code.length;
+      spymaster = false;
       selectionMap = {};
       message = '';
       var ignoreSession = !!codeHistoryMap[code]; // we are reusing previous code, allow re-use of tiles
