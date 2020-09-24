@@ -250,10 +250,12 @@
         }
         if (useSessions && Object.keys(sessionMap).length >= 278) return true; // used up all the tiles - session reset is required. 
       }
-
-      var imgWidth = $(window).width() / 5.5;
+      var winWidth = document.documentElement.clientWidth;
+      var winHeight = document.documentElement.clientHeight;
+      var headerHeight = winWidth > 924 ? 55 : 105;
+      var imgWidth = winWidth / 5.5;
       var imgHeight = imgWidth * 5 / 8;
-      var boardHeight = $(window).height() - 51; // Less header height
+      var boardHeight = winHeight - headerHeight; // Less header height
       if(imgHeight * 5 > boardHeight){
         imgHeight = boardHeight / 5.5;
         imgWidth = imgHeight * 8 / 5;        
