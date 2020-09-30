@@ -158,7 +158,9 @@
   </script>
   
   <script>
-    function renderBoard(reset, ignoreSession) {
+    function renderBoard(props = {}) {
+      var reset = props.reset; 
+      var ignoreSession = props.ignoreSession;
       if (reset) {
         selectionMap = {};
      }
@@ -172,7 +174,7 @@
     function onLoad() {
       var img = document.getElementById('logoImg');
       img.src = logoList[logoIndex % logoList.length];
-      renderBoard(true);
+      renderBoard({reset: true});
       $('#codeId').focus();
     }
     
@@ -184,7 +186,7 @@
       selectionMap = {};
       sessionMap = {};
       codeHistoryMap = {};
-      renderBoard(true);
+      renderBoard({reset: true});
       $('#codeId').focus();
     }
     function onSetSession(event) {
@@ -208,15 +210,15 @@
       selectionMap = {};
       message = '';
       var ignoreSession = !!codeHistoryMap[code]; // we are reusing previous code, allow re-use of tiles
-      codeHistoryMap[code] = codeHistoryMap[code] || {};
-      renderBoard(true, ignoreSession);
-      $('#codeId').focus();
+      codeHistoryMap[code] = codeHistoryMap[code] || [];
+      renderBoard({reset: true, ignoreSession: ignoreSession});
+     $('#codeId').focus();
     }
 
 
     function onSpyMasterClick() {
-      spymaster = !spymaster && code.length;
-      renderBoard(false, true);
+      spymaster = !spymaster && !!code.length;
+      renderBoard();
     }
     function onLogoClick(img) {
       img.src = logoList[++logoIndex % logoList.length];
@@ -229,26 +231,32 @@
         return false; // no reset is required
       };
       var arr = [];
-      while(arr.length < 25) {
-        var randomnumber= Math.floor((Math.random() * 278));
-        var found=false;
-        for(var i=0;i<arr.length;i++){
-          var ignorePreviousUse  = false;
-          if (ignoreSession) {
-            ignorePreviousUse =  codeHistoryMap[code] && sessionMap[randomnumber]; // ignore only if the number was used with the current code; 
+      if (codeHistoryMap[code].length) {
+        arr = codeHistoryMap[code];
+      } else {
+        while(arr.length < 25) {
+          var randomnumber= Math.floor((Math.random() * 278));
+          var found=false;
+          for(var i=0;i<arr.length;i++){
+            var ignorePreviousUse  = false;
+            if (ignoreSession) {
+              ignorePreviousUse =  codeHistoryMap[code] && sessionMap[randomnumber]; // ignore only if the number was used with the current code; 
+            }
+            if(arr[i]===randomnumber || useSessions && (!ignorePreviousUse) && sessionMap[randomnumber]) {
+              found=true;
+              break;
+            } 
+            // if(arr[i]===randomnumber){found=true;break;}
           }
-          if(arr[i]===randomnumber || useSessions && (!ignorePreviousUse) && sessionMap[randomnumber]) {
-            found=true;
-            break;
-          } 
-          // if(arr[i]===randomnumber){found=true;break;}
+          if(!found) {
+            arr.push(randomnumber);
+            sessionMap[randomnumber] = true;
+          }
+          if (useSessions && Object.keys(sessionMap).length >= 278) return true; // used up all the tiles - session reset is required. 
+          if (arr.length) {
+            codeHistoryMap[code] = arr;      
+          }
         }
-        if(!found) {
-          arr.push(randomnumber);
-          sessionMap[randomnumber] = true;
-          codeHistoryMap[code] = true;
-        }
-        if (useSessions && Object.keys(sessionMap).length >= 278) return true; // used up all the tiles - session reset is required. 
       }
       var winWidth = document.documentElement.clientWidth;
       var winHeight = document.documentElement.clientHeight;
