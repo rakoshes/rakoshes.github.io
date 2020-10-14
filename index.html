@@ -233,6 +233,9 @@
       var arr = [];
       if (codeHistoryMap[code].length) {
         arr = codeHistoryMap[code];
+        for (var i = 0; i < arr.length; i++) {
+          var randomnumber= Math.random();  
+        }
       } else {
         while(arr.length < 25) {
           var randomnumber= Math.floor((Math.random() * 278));
@@ -304,7 +307,7 @@
 
       if(isSpymaster){
         $('img.tile').addClass('spymaster');
-        $('img.tile').each(function(){
+        $('img.tile').each(function() {
           if($(this).hasClass('redSecret')){
             $(this).css('border-color', 'red');
           } else if($(this).hasClass('blueSecret')){
@@ -314,34 +317,40 @@
           } else if($(this).hasClass('blackSecret')){
             $(this).css('border-color', 'black');
           }  
-          if (selectionMap[this.id]) {
-            $(this).wrap('<figure class="tint green"></figure>');
-          }
+          // if (selectionMap[this.id]) {
+          //   $(this).wrap('<figure class="tint green"></figure>');
+          // }
         });
 
-        $('img.tile').bind('click', function(){
-          setSelectionMap(this);
-          $(this).wrap('<figure class="tint green"></figure>');
-        });
-      } else {
-        $('img.tile').bind('click', function(){
-          setSelectionMap(this);
-          if($(this).hasClass('redSecret')){
-            $(this).wrap('<figure class="tint red"></figure>');
-          } else if($(this).hasClass('blueSecret')){
-            $(this).wrap('<figure class="tint blue"></figure>');
-          } else if($(this).hasClass('yellowSecret')){
-            $(this).wrap('<figure class="tint yellow"></figure>');
-          } else if($(this).hasClass('blackSecret')){
-            $(this).wrap('<figure class="tint t5"></figure>');
-          }  
-        }); 
-        $('img.tile').each(function(){
-          if(selectionMap[this.id]){
-            $(this).wrap('<figure class="tint ' + selectionMap[this.id] + '"></figure>');
-          }
-        }); 
-      }
+        // $('img.tile').bind('click', function(){
+        //   setSelectionMap(this);
+        //   $(this).wrap('<figure class="tint green"></figure>');
+        // });
+      // } else {
+      } 
+      $('img.tile').bind('click', function(){
+        setSelectionMap(this);
+        if($(this).hasClass('redSecret')){
+          $(this).wrap('<figure class="tint red"></figure>');
+        } else if($(this).hasClass('blueSecret')){
+          $(this).wrap('<figure class="tint blue"></figure>');
+        } else if($(this).hasClass('yellowSecret')){
+          $(this).wrap('<figure class="tint yellow"></figure>');
+        } else if($(this).hasClass('blackSecret')){
+          $(this).wrap('<figure class="tint t5"></figure>');
+        }  
+      }); 
+        // $('img.tile').each(function(){
+        //   if(selectionMap[this.id]){
+        //     $(this).wrap('<figure class="tint ' + selectionMap[this.id] + '"></figure>');
+        //   }
+        // }); 
+      
+      $('img.tile').each(function(){
+        if(selectionMap[this.id]){
+          $(this).wrap('<figure class="tint ' + selectionMap[this.id] + '"></figure>');
+        }
+      }); 
       return false; // successfully rendered the board, no reset required
     };
   
