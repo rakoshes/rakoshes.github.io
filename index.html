@@ -29,6 +29,7 @@
     #theTable{
       border: solid;
       border-color: red;
+      border-width: 5px;
     }
     .tint {
       position: relative;
@@ -140,6 +141,7 @@
     var selectionMap = {};
     var sessionMap = {};
     var codeHistoryMap = {};
+    var teamsMap = {};
     var message = '';
     var logoIndex = parseInt(localStorage.getItem('logoIndex')) || 0;
     var logoList = [
@@ -163,7 +165,7 @@
       var ignoreSession = props.ignoreSession;
       if (reset) {
         selectionMap = {};
-     }
+    }
       if (code.length) {;
         Math.seedrandom(code);
       }
@@ -186,6 +188,7 @@
       selectionMap = {};
       sessionMap = {};
       codeHistoryMap = {};
+      teamsMap = {};
       renderBoard({reset: true});
       $('#codeId').focus();
     }
@@ -211,6 +214,7 @@
       message = '';
       var ignoreSession = !!codeHistoryMap[code]; // we are reusing previous code, allow re-use of tiles
       codeHistoryMap[code] = codeHistoryMap[code] || [];
+      teamsMap[code] = teamsMap[code] || [];
       renderBoard({reset: true, ignoreSession: ignoreSession});
      $('#codeId').focus();
     }
@@ -233,9 +237,6 @@
       var arr = [];
       if (codeHistoryMap[code].length) {
         arr = codeHistoryMap[code];
-        for (var i = 0; i < arr.length; i++) {
-          var randomnumber= Math.random();  
-        }
       } else {
         while(arr.length < 25) {
           var randomnumber= Math.floor((Math.random() * 278));
@@ -249,7 +250,6 @@
               found=true;
               break;
             } 
-            // if(arr[i]===randomnumber){found=true;break;}
           }
           if(!found) {
             arr.push(randomnumber);
@@ -280,31 +280,47 @@
         }
       }
       var teams = [];
-      //9 8 1 7     
-      for(var i = 0;i<7;i++){
+      for (var i = 0; i < teamsMap[code].length; i++) {
+        teams.push(teamsMap[code][i]);
+      }
+      //9 8 1 7    
+      if (teams.length === 0) { 
+        for(var i = 0;i<7;i++){
+          teams.push('redSecret');
+          teams.push('blueSecret');
+          teams.push('yellowSecret');
+        }
         teams.push('redSecret');
         teams.push('blueSecret');
-        teams.push('yellowSecret');
+        teams.push('blackSecret');
+        //random starter team
+        if(Math.floor((Math.random() * 2) + 1) % 2 === 0){
+            teams.push('redSecret');
+            //make border red
+        } else {
+          teams.push('blueSecret');
+        }
+        shuffle(teams);
+        teamsMap[code] = [];
+        for (var i = 0; i < teams.length; i++) {
+          teamsMap[code].push(teams[i]);
+        }
+     }
+      var blueTileCount = redTileCount = 0;
+      for (var i = 0; i < teams.length; i++) {
+        if (teams[i] === 'blueSecret') {
+          blueTileCount++;
+        }
+        if (teams[i] === 'redSecret') {
+          redTileCount++;
+        }
       }
-      teams.push('redSecret');
-      teams.push('blueSecret');
-      teams.push('blackSecret');
-      //random starter team
-      if(Math.floor((Math.random() * 2) + 1) % 2 === 0){
-          teams.push('redSecret');
-          //make border red
-      } else {
-        teams.push('blueSecret');
+      if (blueTileCount > redTileCount) {
         $('#theTable').css('border-color', 'blue');
       }
-
-
-      shuffle(teams);
-      $( "img.tile" ).each(function() {
+      $( 'img.tile' ).each(function() {
         $(this).addClass(teams.pop());
       });
-
-
       if(isSpymaster){
         $('img.tile').addClass('spymaster');
         $('img.tile').each(function() {
@@ -317,16 +333,8 @@
           } else if($(this).hasClass('blackSecret')){
             $(this).css('border-color', 'black');
           }  
-          // if (selectionMap[this.id]) {
-          //   $(this).wrap('<figure class="tint green"></figure>');
-          // }
         });
 
-        // $('img.tile').bind('click', function(){
-        //   setSelectionMap(this);
-        //   $(this).wrap('<figure class="tint green"></figure>');
-        // });
-      // } else {
       } 
       $('img.tile').bind('click', function(){
         setSelectionMap(this);
@@ -340,11 +348,6 @@
           $(this).wrap('<figure class="tint t5"></figure>');
         }  
       }); 
-        // $('img.tile').each(function(){
-        //   if(selectionMap[this.id]){
-        //     $(this).wrap('<figure class="tint ' + selectionMap[this.id] + '"></figure>');
-        //   }
-        // }); 
       
       $('img.tile').each(function(){
         if(selectionMap[this.id]){
