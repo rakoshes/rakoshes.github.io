@@ -28,7 +28,7 @@
     }
     #theTable{
       border: solid;
-      border-color: red;
+      border-color: grey;
       border-width: 5px;
     }
     .tint {
@@ -317,6 +317,9 @@
       }
       if (blueTileCount > redTileCount) {
         $('#theTable').css('border-color', 'blue');
+      } 
+      if  (blueTileCount < redTileCount) {
+        $('#theTable').css('border-color', 'red');
       }
       $( 'img.tile' ).each(function() {
         $(this).addClass(teams.pop());
@@ -394,7 +397,7 @@
   <div class="actionBar">
     <div class="logoContainer">
       <img id="logoImg" class="logoImg"  onclick="onLogoClick(this)" src="img/blank.png" />
-      <span id="promptId" class="title">Welcome to KodeNames!</span>
+      <span id="promptId" class="title" title="10/15/2020, 01:05 AM">Welcome to KodeNames!</span>
       <button id="spyMasterId" class="leftButton" onclick="onSpyMasterClick()">Spy Master</button>
       <span id="messageId" class="message"></span>
     </div>
