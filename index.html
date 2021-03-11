@@ -75,9 +75,17 @@
     figure {
       margin: 0 0 0 0;
     }
+    .codeList {
+      background-color: #fff;
+      color: #000;
+      padding: 0 8px 8px 8px;  
+      min-width: 800px;
+    }
+
     .actionBar {
       background-color: #fff;
       color: #000;
+      min-width: 800px;
     }
     .actionBarContainer {
       float: right;
@@ -94,22 +102,36 @@
       cursor: pointer;
     }
     button {
-      padding: 8px;
+      margin: 8px 8px 0 0;
+      padding: 4px;
       cursor: pointer;
     }
     .codeInput {
-      margin: 0 16px;
-      padding: 6px;
-      font-size: 16px;
-    }
-    .sessionsCheck {
-      cursor: pointer;
-    }
-    .sessionsLabel {
-      margin: 0 16px 0 0;
-      font-family: Arial, Helvetica, sans-serif;
+      margin: 8px 8px 0 0;
+      padding: 4px 6px;
       font-size: 14px;
-      cursor: pointer;
+      width: 80px;
+    }
+    .blueStats {
+      color: #0000ff;
+      font-weight: 600;
+      padding-left: 16px;
+      font-size: 16px;
+      font-family: Arial, Helvetica, sans-serif;
+    }    
+    .redStats {
+      color: #ff0000;
+      font-weight: 600;    
+      padding-left: 16px;
+      font-size: 16px;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+    .kaboom {
+      color: #000;
+      font-weight: 700;    
+      padding-left: 16px;
+      font-size: 16px;
+      font-family: Arial, Helvetica, sans-serif;
     }
     .title {
       font-weight: bold;
@@ -135,14 +157,17 @@
   </style>
   <script src="seedrandom.js"></script>
   <script>
+    var codeBoxMap = {};
     var spymaster = false;
     var code = "";
-    var useSessions = false;
     var selectionMap = {};
     var sessionMap = {};
     var codeHistoryMap = {};
     var teamsMap = {};
     var message = '';
+    var blueTileCount = redTileCount = 0;
+    var redCount = blueCount = 0;
+    var kaboom = false;
     var logoIndex = parseInt(localStorage.getItem('logoIndex')) || 0;
     var logoList = [
     "img/blackhat.png",
@@ -160,44 +185,116 @@
   </script>
   
   <script>
+    function testDups() {
+      console.log('==== Test start ====');
+      var myMap = {};
+      var rc = true;
+      Object.values(codeHistoryMap).forEach((current) => {
+        current.forEach((el) => {
+          if (myMap[el]) {
+            console.log('==== duplicate:', current, el);
+            rc =  false;
+          }
+          myMap[el] = true;
+        })
+      });
+      console.log('==== Test stop ====', codeHistoryMap);
+      return rc;
+    };
+    function setGameStats() {
+      redCount = redTileCount - $('.red').length;
+      blueCount = blueTileCount - $('.blue').length;
+      blackTiles = $('.t5').length;
+
+      $('#redStats').text(redCount ? redCount : 'Winner!');
+      $('#blueStats').text(blueCount ? blueCount : 'Winner!');
+      $('#kaboom').text(blackTiles > 0 ? 'KABOOM!' : '');
+    }
     function renderBoard(props = {}) {
       var reset = props.reset; 
       var ignoreSession = props.ignoreSession;
       if (reset) {
         selectionMap = {};
-    }
-      if (code.length) {;
+      }
+      if (code.length) {
         Math.seedrandom(code);
       }
       if (render(spymaster, ignoreSession)) { 
         onReset('Out of cards.'); // reset was requiested
       }
     }
+    function codeFieldsInit() {
+      if (codeBoxMap["codeId1"] !== undefined) return;
+      for (var i = 1; i <= 10; i++) {
+        var codeBoxId = "codeId" + i;
+        codeBoxMap[codeBoxId] = document.getElementById(codeBoxId);
+      }
+    }
+    function renderCodeFields(config = {}) {
+      codeFieldsInit();
+      var applyButton = document.getElementById("applyId");
+      if (config.reset) {
+        for (var i = 1; i <= 10; i++) {
+          var codeBoxId = "codeId" + i;
+          var codeBox = codeBoxMap[codeBoxId];
+          codeBox.value = '';
+          codeBox.disabled = i > 1;
+        }
+        applyButton.disabled = true;
+      }
+      if (config.update) {
+        var emptyIndex;
+        var dirtyIndex;
+        var codeValueMap = {};
+        var hasDoubles = false;
+        for (var i = 1; i <= 10; i++) {
+          var codeBoxId = "codeId" + i;
+          var codeBox = codeBoxMap[codeBoxId];
+          var value = codeBox.value && codeBox.value.trim();
+          if (emptyIndex === undefined && (!value || value === '')) {
+            emptyIndex = i;
+          }
+          if (codeBox.value && codeBox.value.length > 0) {
+            dirtyIndex = i;
+          }
+          codeBox.disabled = emptyIndex && emptyIndex < i;
+          if (value) {
+            if (codeValueMap[value]) {
+              hasDoubles = true;
+            } else { 
+              codeValueMap[value] = true;  
+            }
+          }
+        }
+        applyButton.disabled = hasDoubles || dirtyIndex && emptyIndex && emptyIndex < dirtyIndex; 
+        if (!codeBoxMap['codeId1'].value || codeBoxMap['codeId1'].value.trim().length === 0) {
+          applyButton.disabled = true;
+        }
+      }
+    }
+
     function onLoad() {
       var img = document.getElementById('logoImg');
       img.src = logoList[logoIndex % logoList.length];
+      renderCodeFields({reset: true}); // reset code list, set round to 1, disable extra code fields
       renderBoard({reset: true});
-      $('#codeId').focus();
+      $('#codeId1').focus();
     }
     
     function onReset(msg) {
       spymaster = false;
       code = '';
       message = msg || '';
-      document.getElementById('codeId').value = code = "";
       selectionMap = {};
       sessionMap = {};
       codeHistoryMap = {};
       teamsMap = {};
+      renderCodeFields({ reset: true }); 
       renderBoard({reset: true});
-      $('#codeId').focus();
     }
-    function onSetSession(event) {
-      useSessions = !useSessions;
-      onReset(useSessions ? 'Sessions on' : 'Sessions Off');
-    }
-    function onInputChange(value) {
-      // code = value;
+    function onInputChange(config) {
+      config.update = true;
+      renderCodeFields(config); // show next code field if current is not empty
     }
     function onKeyPress(event) {
       if (event.keyCode == 13) {
@@ -205,20 +302,37 @@
       }
     }
 
-    function onApplyClick() {
-      var newCode = document.getElementById('codeId').value;
+    function onApplyClickWorker(newCode) {
       if (code === newCode) return;
       code = newCode;
       spymaster = false;
+      message = '';
       selectionMap = {};
       message = '';
-      var ignoreSession = !!codeHistoryMap[code]; // we are reusing previous code, allow re-use of tiles
+      // var ignoreSession = !!codeHistoryMap[code]; // we are reusing previous code, allow re-use of tiles
       codeHistoryMap[code] = codeHistoryMap[code] || [];
       teamsMap[code] = teamsMap[code] || [];
-      renderBoard({reset: true, ignoreSession: ignoreSession});
-     $('#codeId').focus();
+      // renderBoard({reset: true, ignoreSession: ignoreSession});
+      renderBoard({reset: true, ignoreSession: false});
     }
 
+    function onApplyClick() {
+      code = '';
+      var acc = '';
+      codeHistoryMap = {};
+      sessionMap = {};
+      for (var i = 1; i <= 10; i++) {
+        var codeBoxId = "codeId" + i;
+        var codeBox = codeBoxMap[codeBoxId];
+        if (!codeBox.value || codeBox.value === '') {
+          break;
+        }
+        codeBox.value = codeBox.value.trim();
+        acc += (codeBox.value + '/');
+        onApplyClickWorker(acc);
+      }
+      // testDups();
+    }
 
     function onSpyMasterClick() {
       spymaster = !spymaster && !!code.length;
@@ -246,16 +360,18 @@
             if (ignoreSession) {
               ignorePreviousUse =  codeHistoryMap[code] && sessionMap[randomnumber]; // ignore only if the number was used with the current code; 
             }
-            if(arr[i]===randomnumber || useSessions && (!ignorePreviousUse) && sessionMap[randomnumber]) {
+            if(arr[i] === randomnumber || (!ignorePreviousUse) && sessionMap[randomnumber]) {
               found=true;
               break;
             } 
           }
-          if(!found) {
+          if(!found && !sessionMap[randomnumber]) {
             arr.push(randomnumber);
             sessionMap[randomnumber] = true;
           }
-          if (useSessions && Object.keys(sessionMap).length >= 278) return true; // used up all the tiles - session reset is required. 
+          // var rc = testDups();
+          // if (!rc) debugger;
+          if (Object.keys(sessionMap).length >= 278) return true; // used up all the tiles - session reset is required. 
           if (arr.length) {
             codeHistoryMap[code] = arr;      
           }
@@ -272,8 +388,8 @@
         imgWidth = imgHeight * 8 / 5;        
       }
       var arrCounter = 0;
+      // Populate board  
       for(var i = 0;i < 5; i++){
-        
         $('#theTable').append('<tr id="row' + i + '""></tr>');
         for (var j = 0;j < 5; j++){
           $('#row' + i).append('<td><img id="tile' + arrCounter + '" class="tile" src="assets/pix' + arr[arrCounter++] + '.png" style="width: ' + imgWidth + 'px; height: ' + imgHeight +'px;"></td>');
@@ -306,7 +422,7 @@
           teamsMap[code].push(teams[i]);
         }
      }
-      var blueTileCount = redTileCount = 0;
+      blueTileCount = redTileCount = 0;
       for (var i = 0; i < teams.length; i++) {
         if (teams[i] === 'blueSecret') {
           blueTileCount++;
@@ -315,6 +431,9 @@
           redTileCount++;
         }
       }
+      blueCount = blueTileCount;
+      redCount = redTileCount;
+      kaboom = false;  
       if (blueTileCount > redTileCount) {
         $('#theTable').css('border-color', 'blue');
       } 
@@ -349,7 +468,8 @@
           $(this).wrap('<figure class="tint yellow"></figure>');
         } else if($(this).hasClass('blackSecret')){
           $(this).wrap('<figure class="tint t5"></figure>');
-        }  
+        } 
+        setGameStats(); 
       }); 
       
       $('img.tile').each(function(){
@@ -357,6 +477,7 @@
           $(this).wrap('<figure class="tint ' + selectionMap[this.id] + '"></figure>');
         }
       }); 
+      setGameStats();
       return false; // successfully rendered the board, no reset required
     };
   
@@ -397,19 +518,31 @@
   <div class="actionBar">
     <div class="logoContainer">
       <img id="logoImg" class="logoImg"  onclick="onLogoClick(this)" src="img/blank.png" />
-      <span id="promptId" class="title" title="10/15/2020, 01:05 AM">Welcome to KodeNames!</span>
+      <span id="promptId" class="title" title="03/11/2021, 02:09 AM">Welcome to KodeNames!</span>
       <button id="spyMasterId" class="leftButton" onclick="onSpyMasterClick()">Spy Master</button>
       <span id="messageId" class="message"></span>
     </div>
-    <div class="actionBarContainer">
-      <input id="setSessionId" class="sessionsCheck" type="checkbox" onclick="onSetSession(event)" />
-      <label class="sessionsLabel" for="setSessionId">Sessions</label>
-      <button id="resetId" onclick="onReset()">Reset</button>
-      <input id="codeId" class="codeInput" type="text" placeholder="Enter code" maxlength="10" onkeypress="return onKeyPress(event)" onkeyup="onInputChange(this.value)" />
-      <button id="applyId" onclick="onApplyClick()">Apply</button>
+    <button id="applyId" onclick="onApplyClick()">Apply</button>
+    <button id="resetId" onclick="onReset()">Reset</button>
+    <span id="redStats" class="redStats"></span>
+    <span id="blueStats" class="blueStats"></span>
+    <span id="kaboom" class="kaboom"></span>
+  <div class="actionBarContainer">
     </div>
     <div style="clear: both;"></div>
   </div>
+  <div class="codeList" id="codeListId">
+    <input id="codeId1" class="codeInput" type="text" placeholder="Round 1" maxlength="10" onkeypress="return onKeyPress(event)" onkeyup="onInputChange({ round: 1, value: this.value })" />
+    <input id="codeId2" class="codeInput" type="text" placeholder="Round 2" maxlength="10" onkeypress="return onKeyPress(event)" onkeyup="onInputChange({ round: 2, value: this.value })" />
+    <input id="codeId3" class="codeInput" type="text" placeholder="Round 3" maxlength="10" onkeypress="return onKeyPress(event)" onkeyup="onInputChange({ round: 3, value: this.value })" />
+    <input id="codeId4" class="codeInput" type="text" placeholder="Round 4" maxlength="10" onkeypress="return onKeyPress(event)" onkeyup="onInputChange({ round: 4, value: this.value })" />
+    <input id="codeId5" class="codeInput" type="text" placeholder="Round 5" maxlength="10" onkeypress="return onKeyPress(event)" onkeyup="onInputChange({ round: 5, value: this.value })" />
+    <input id="codeId6" class="codeInput" type="text" placeholder="Round 6" maxlength="10" onkeypress="return onKeyPress(event)" onkeyup="onInputChange({ round: 6, value: this.value })" />
+    <input id="codeId7" class="codeInput" type="text" placeholder="Round 7" maxlength="10" onkeypress="return onKeyPress(event)" onkeyup="onInputChange({ round: 7, value: this.value })" />
+    <input id="codeId8" class="codeInput" type="text" placeholder="Round 8" maxlength="10" onkeypress="return onKeyPress(event)" onkeyup="onInputChange({ round: 8, value: this.value })" />
+    <input id="codeId9" class="codeInput" type="text" placeholder="Round 9" maxlength="10" onkeypress="return onKeyPress(event)" onkeyup="onInputChange({ round: 9, value: this.value })" />
+    <input id="codeId10" class="codeInput" type="text" placeholder="Round 10" maxlength="10" onkeypress="return onKeyPress(event)" onkeyup="onInputChange({ round: 10, value: this.value })" />
+</div>
   <table id='theTable' style="width:100%">
   </table>
 </body>
